@@ -5,13 +5,12 @@ const morgan = require('morgan');
 const app = express();
 const router = require('./router');
 const mongoose = require('mongoose');
-const cors = require('cors'); 
+const cors = require('cors');
 
 /**
  * DATABASE
  */
- mongoose.connect('localhost:27017/myDatabase');
-
+ mongoose.connect('localhost:27017/rolo');
 
 /**
  * SERVER

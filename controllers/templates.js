@@ -12,25 +12,25 @@ exports.signin = function(req, res, next) {
 }
 
 exports.signup = function(req, res, next) {
-  const email = req.body.email;
+  const username = req.body.username;
   const password = req.body.password;
-  console.log(`Signing up user (${email})/(${password})`);
+  console.log(`Signing up user (${username})/(${password})`);
   // basic validation
-  if (!email || !password) {
-    return res.status(422).send({ error: 'email and password are required'});
+  if (!username || !password) {
+    return res.status(422).send({ error: 'username and password are required'});
   }
 
-  User.findOne({ email: email }, function(err, existingUser) {
+  User.findOne({ username: username }, function(err, existingUser) {
     if (err) { return next(err); }
 
-    // email is already taken
+    // username is already taken
     if (existingUser) {
-      return res.status(422).send({error:'email in use'});
+      return res.status(422).send({error:'username in use'});
     }
 
     // create and save
     const user = new User({
-      email: email,
+      username: username,
       password: password
     });
 

@@ -7,37 +7,64 @@ function tokenForUser(user) {
   return jwt.encode({ sub: user.id, iat: timestamp }, config.secret);
 }
 
+exports.getUser = function(req, res, next) {
+  const username = req.params.username
+  const user = User.findOne({ username: username }, (err, user) => {
+    if (err) return next(err);
+    res.json({ user });
+  });
+};
+
 exports.signin = function(req, res, next) {
-  res.send({ token: tokenForUser(req.user) });
-}
+  res.send({
+    token: tokenForUser(req.user),
+    user: req.user
+  });
+};
 
 exports.signup = function(req, res, next) {
-  const email = req.body.email;
+  const username = req.body.username;
   const password = req.body.password;
-  console.log(`Signing up user (${email})/(${password})`);
   // basic validation
-  if (!email || !password) {
-    return res.status(422).send({ error: 'email and password are required'});
+  if (!username || !password) {
+    return res.status(422).send({ error: 'username and password are required'});
   }
 
-  User.findOne({ email: email }, function(err, existingUser) {
+  User.findOne({ username: username }, function(err, existingUser) {
     if (err) { return next(err); }
 
-    // email is already taken
+    // username is already taken
     if (existingUser) {
-      return res.status(422).send({error:'email in use'});
+      return res.status(422).send({error:'username in use'});
     }
 
     // create and save
     const user = new User({
-      email: email,
+      username: username,
       password: password
     });
 
     user.save(function(err) {
       if (err) { return next(err); }
 
-      res.json({ token: tokenForUser(user)});
+      res.json({ token: tokenForUser(user), user: user});
     });
   });
+};
+
+exports.update = function(req, res, next) {
+  console.log('============================================================');
+  const userData = req.body.data;
+  console.log('userData ~~>', userData);
+  if (!userData) next();
+  User.findById(req.params.id, (err, user) => {
+    user.name = userData.name;
+    user.projects = userData.projects;
+    user.blurb = userData.blurb;
+    user.color = userData.color;
+    user.save(err => {
+      if (err) { return next(err) }
+      res.status(200).send('success');
+    })
+  })
 };
